@@ -6,12 +6,12 @@ with tf.Session() as sess:
 	[1, 1, 0, 0, 0, 1, 1, 0],
 	[1, 1, 0, 0, 0, 0, 1, 0],
 	[0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0],
 	[0, 0, 0, 1, 1, 0, 0, 0],
-	[0, 0, 0, 1, 1, 0, 0, 0],
-	[0, 1, 0, 0, 0, 0, 0, 0],
+	[0, 1, 0, 1, 1, 0, 0, 0],
 	[0, 1, 0, 0, 0, 0, 0, 0],
 	[0, 0, 0, 0, 0, 0, 0, 0]
-	], dtype='int32')
+	], dtype='float32')
 
 	x_size = tf.constant(8, dtype='int32') 
 	y_size = tf.constant(8, dtype='int32')
@@ -28,17 +28,31 @@ with tf.Session() as sess:
 	shift_up_left = tf.pad(split_3, [[0, 1], [0, 1]])
 
 	max_matrix = tf.add_n([initial_input, shift_up, shift_left, shift_up_left])
+	
+	'''
+	window_size = tf.constant([2, 2], dtype='int32')
+	kernel = tf.pad(tf.ones(window_size), ((1, 0), (1, 0), (0, 0), (0, 0)))
+	max_matrix = tf.nn.conv2d(initial_input, kernel, [1, 1, 1, 1], 'SAME')
+	'''
 
-	init_i = tf.constant(0, dtype=tf.int32)
+	init_i = tf.constant(0, dtype='int32')
 	init_indeces = tf.TensorArray(dtype=tf.int32, size=4)
 
 	def should_continue(i, max_matrix, indeces):
 		return i < 4
 
 	def iteration(i, max_matrix, indeces):
-		max_value = tf.reduce_max(max_matrix)
-		max_index_x = tf.cast(tf.argmax(tf.reduce_max(max_matrix, axis=0), axis=0), dtype='int32')
-		max_index_y = tf.cast(tf.argmax(tf.reduce_max(max_matrix, axis=1), axis=0), dtype='int32')
+		print max_matrix
+		flattened_max = tf.reshape(max_matrix, [-1])
+		print flattened_max
+		
+		max_value = tf.reduce_max(flattened_max)
+		#max_index_x = tf.cast(tf.argmax(tf.reduce_max(max_matrix, axis=0), axis=0), dtype='int32')
+		#max_index_y = tf.cast(tf.argmax(tf.reduce_max(max_matrix, axis=1), axis=0), dtype='int32')
+		flattened_max_index = tf.cast(tf.argmax(flattened_max, axis=0), dtype='int32')
+		print flattened_max_index
+		max_index_x = tf.cast(flattened_max_index % x_size, dtype='int32')
+		max_index_y = tf.cast(flattened_max_index / y_size, dtype='int32')
 
 		# Should change this from 3x3 to based off the window size
 		#mask_unpadded = tf.multiply(max_value, tf.ones([3, 3], tf.int32))
@@ -49,8 +63,7 @@ with tf.Session() as sess:
 		
 		mask = tf.pad(mask_unpadded, paddings)
 		
-		#indeces = indeces.write(i, tf.stack(max_index_x, max_index_y))
-		indeces = indeces.write(i, [max_index_x, max_index_y])
+		indeces = indeces.write(i, [max_index_y, max_index_x])
 
 		return i + 1, max_matrix - mask, indeces
 
@@ -90,7 +103,7 @@ with tf.Session() as sess:
 
 	def populate_row(j, output, manhattan_distance, indeces, initial_input):
 		init_i = tf.constant(0, dtype=tf.int32)
-		init_row = tf.zeros([2, 4], dtype=tf.int32)
+		init_row = tf.zeros([2, 4], dtype=tf.float32)
 
 		i, row_output, manhattan_distance, indeces, initial_input = tf.while_loop(continue_populate, populate_column, [init_i, init_row, manhattan_distance, indeces, initial_input])
 		
@@ -101,11 +114,11 @@ with tf.Session() as sess:
 		return [j + 1, output + row_padded, manhattan_distance, indeces, initial_input]
 	
 	init_j = tf.constant(0, dtype=tf.int32)
-	init_output = tf.zeros([4, 4], dtype=tf.int32)
+	init_output = tf.zeros([4, 4], dtype=tf.float32)
 
 	j, output, manhattan_distance, indeces, initial_input = tf.while_loop(continue_populate, populate_row, [init_j, init_output, manhattan_distance, indeces, initial_input])
 	
 	writer = tf.summary.FileWriter('./graphs', sess.graph)
-	print sess.run([output, manhattan_distance, indeces, initial_input])
+	print sess.run([output, manhattan_distance, indeces, initial_input, max_matrix])
 
 writer.close()
