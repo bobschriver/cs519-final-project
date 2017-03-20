@@ -1,19 +1,6 @@
 import tensorflow as tf
-
-initial_input = tf.Variable(
-	[
-		[
-			[[1], [1], [0], [0], [0], [1], [1], [0]],
-			[[1], [1], [0], [0], [0], [0], [1], [0]],
-			[[0], [0], [0], [0], [0], [0], [0], [0]],
-			[[0], [0], [0], [1], [1], [0], [0], [0]],
-			[[0], [0], [0], [1], [1], [0], [0], [0]],
-			[[0], [1], [0], [0], [0], [0], [0], [0]],
-			[[0], [1], [0], [0], [0], [0], [0], [0]],
-			[[0], [0], [0], [0], [0], [0], [0], [0]]
-		],
-
-		[
+'''
+[
 			[[0], [1], [1], [0], [0], [0], [1], [1]],
 			[[0], [1], [1], [0], [0], [0], [1], [1]],
 			[[0], [0], [0], [0], [0], [0], [0], [0]],
@@ -23,62 +10,119 @@ initial_input = tf.Variable(
 			[[0], [0], [0], [0], [0], [0], [0], [0]],
 			[[0], [0], [0], [0], [0], [0], [0], [0]]
 		]
+'''
+
+initial_input = tf.Variable(
+	[
+		[
+			[[1, 0, 1, 0], [1, 0, 1, 0], [0, 1, 0, 1], [0, 1, 0, 1], [0, 1, 0, 1], [1, 0, 1, 0], [1, 0, 1, 0], [0, 1, 0, 1]],
+			[[1, 1, 0, 1], [1, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [1, 1, 0, 1], [0, 0, 1, 0]],
+			[[0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1]],
+			[[0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [1, 1, 0, 1], [1, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0]],
+			[[1, 0, 1, 0], [1, 0, 1, 0], [0, 1, 0, 1], [0, 1, 0, 1], [0, 1, 0, 1], [1, 0, 1, 0], [1, 0, 1, 0], [0, 1, 0, 1]],
+			[[1, 1, 0, 1], [1, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [1, 1, 0, 1], [0, 0, 1, 0]],
+			[[0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1]],
+			[[0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [1, 1, 0, 1], [1, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0]],
+		],
+		[
+			[[1, 0, 1, 0], [1, 0, 1, 0], [0, 1, 0, 1], [0, 1, 0, 1], [0, 1, 0, 1], [1, 0, 1, 0], [1, 0, 1, 0], [0, 1, 0, 1]],
+			[[1, 1, 0, 1], [1, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [1, 1, 0, 1], [0, 0, 1, 0]],
+			[[0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1]],
+			[[0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [1, 1, 0, 1], [1, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0]],
+			[[1, 0, 1, 0], [1, 0, 1, 0], [0, 1, 0, 1], [0, 1, 0, 1], [0, 1, 0, 1], [1, 0, 1, 0], [1, 0, 1, 0], [0, 1, 0, 1]],
+			[[1, 1, 0, 1], [1, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [1, 1, 0, 1], [0, 0, 1, 0]],
+			[[0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1]],
+			[[0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [1, 1, 0, 1], [1, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0]],
+		],
 
 	], 
 	dtype='float32')
 
-#Index 3 and 5 are our window sizes
-input_windowed = tf.reshape(initial_input, [2, 4, 2, 4, 2])
 
-sum_input = tf.reduce_sum(tf.reduce_sum(input_windowed, 4), 2)
+input_stacked = tf.transpose(initial_input, [0, 3, 1, 2])
+print input_stacked
+#Index 3 and 5 are our window sizes
+#Index 1 is our channel
+#Index 0 is our batch
+#Index 2 and 4 are our resized shape
+input_windowed = tf.transpose(tf.reshape(input_stacked, [2, 4, 4, 2, 4, 2]), [0, 1, 2, 4, 3, 5])
+print input_windowed
+
+sum_input = tf.reduce_sum(tf.reduce_sum(input_windowed, 5), 4)
 print sum_input
 
-box = input_windowed[:, 0, :, 0, :]
+# Batch
+# Channels
+# Rest
+flattened_sum = tf.reshape(sum_input, [2, 4, -1])
+print flattened_sum
 
-window_size = tf.constant([2, 2, 1, 1], dtype='int32')
+# Window size * 2
+argmax_flat = tf.nn.top_k(flattened_sum, k=4, sorted=False)
+max_flat_indeces = argmax_flat[1] 
+print max_flat_indeces
 
-kernel = tf.pad(tf.ones(window_size), ((1, 0), (1, 0), (0, 0), (0, 0)))
+topk_indeces = tf.nn.top_k(max_flat_indeces, k=4)
+topk_indeces_values = tf.reverse(topk_indeces[0], [2])
+print topk_indeces_values
 
-max_window = tf.nn.conv2d(initial_input, kernel, [1, 1, 1, 1], 'SAME')
-print max_window
+# Resized Shape 
+x_indeces = topk_indeces_values % 4
+y_indeces = topk_indeces_values // 4
+print x_indeces
+print y_indeces
 
-flattened_max = tf.reshape(max_window, [2, -1])
-print flattened_max
+indeces = tf.stack([y_indeces, x_indeces], axis=-1)
+print indeces
 
-#batch_last = tf.transpose(max_window, perm = [3, 1, 2, 0])
-#print batch_last
+# Resized Shape
+v = tf.tile([[[0]], [[1]]], [1, 4, 4])
 
-max_indeces_flat = tf.argmax(flattened_max, axis=1)
+# Window shape * 2
+# Resized Shape
+w = tf.reshape(tf.tile(tf.expand_dims(tf.range(0, 4), axis=-1), [2, 4]), [2, 4, 4])
+z = tf.stack([v, w], axis=-1)
 
-output_list = []
-output_list.append(max_indeces_flat // (8))
-output_list.append(max_indeces_flat % 8)
+q = tf.concat([z, indeces], axis=-1)
 
-max_image_indeces = tf.cast(output_list, dtype='int32')
-max_image_windows_padding_top_left = max_image_indeces
-max_image_windows_padding_bottom_right = -1 * (max_image_indeces - 7)
-
-max_image_window_padding = tf.stack([max_image_windows_padding_top_left, max_image_windows_padding_bottom_right], axis=1)
-print max_image_window_padding
-
-#channel_indeces = tf.expand_dims(tf.range(2), axis=1)
-#print channel_indeces
-
-#max_indeces = tf.concat([channel_indeces, max_image_indeces], axis=1)
-
-max_mask = tf.ones([2, 3, 3])
-
-
+# 0 - Batch
+# 1 - Channel
+# 2 - Y / Rows
+# 3 - X / Cols
+#windows = tf.gather_nd(input_windowed, [[0, 0, 0, 0], [0, 1, 0, 0], [0, 2, 0, 2], [0, 3, 1, 1]])
+windows = tf.gather_nd(input_windowed, q)
+print windows
+# Who fucking knows how this works
+# Reverse of the above one
+l = tf.reshape(windows, [2, 4, 2, 2, 2, 2])
+m = tf.transpose(l, [0, 1, 2, 4, 3, 5])
+o = tf.reshape(m, [2, 4, 4, 4])
+# Batch
+# Channels
+# Resized Shape
+windows_reshaped = tf.reshape(windows, [2, 4, 4, 4])
+windows_transposed = tf.transpose(windows_reshaped, [0, 3, 1, 2])
 
 init_op = tf.global_variables_initializer()
 with tf.Session() as sess:
 	sess.run([init_op])
 
-	print initial_input.eval()
-	print sum_input.eval()
-
-	#print max_image_windows_padding_top_left.eval()
-	#print max_image_windows_padding_bottom_right.eval()
-	#print max_image_window_padding.eval()
-	#print max_mask.eval()
+	print input_stacked.eval()
+	#print input_windowed.eval()
+	#print sum_input.eval()
+	#print flattened_sum.eval()
+	#print max_values.eval()
+	print max_flat_indeces.eval()
+	print topk_indeces_values.eval()
+	#print x_indeces.eval()
+	#print y_indeces.eval()
+	#print indeces.eval()
+	#print z.eval()
+	print q.eval()
+	print windows.eval()
+	#print l.eval()
+	#print m.eval()
+	print o.eval()
+	#print windows_reshaped.eval()
+	#print windows_transposed.eval()
 

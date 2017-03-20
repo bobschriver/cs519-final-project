@@ -47,12 +47,15 @@ Y_test = np_utils.to_categorical(y_test, nb_classes)
 
 model = Sequential()
 
-w = [np.array([[[[1],
-		[1],
-		[1]],
-		[[3],
-		[3],
-		[3]],
+w = [np.array(
+	[
+		[
+			[
+				[1],[1],[1]
+			],
+			[
+				[3],[3],[3]
+			],
 		[[3],
 		[3],
 		[3]],
@@ -99,18 +102,28 @@ w = [np.array([[[[1],
 		[1],
 		[1]]]],dtype='float32')]
 
+print(len(w))
+print(w[0].shape)
 
+w2 = np.array([
+		[[[1]], [[3]], [[3]], [[1]]],
+		[[[3]], [[9]], [[9]], [[3]]],
+		[[[3]], [[9]], [[9]], [[3]]],
+		[[[1]], [[3]], [[3]], [[1]]]
+	], dtype='float32')
+
+w_tile = [np.tile(w2, [1, 1, 3, 1])]
+
+print(len(w_tile))
+print(w_tile[0].shape)
 
 model.add(Convolution2D(3, 3, 3, border_mode='same',input_shape=(32,32,3)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
-conv = Conv2D(1, 4, strides=[2,2], weights =w, border_mode='same', activation='relu',bias=False,trainable=False)
-#conv.set_weights(w)
+conv = Conv2D(1, 4, strides=[2,2], weights=w_tile, border_mode='same', activation='relu',trainable=False,bias=False)
 model.add(conv)
 #model.add(MaxPooling2D(pool_size=(2, 2)))
-
-print("Shape of Weights: ", conv.get_weights())
 
 model.add(Convolution2D(64, 3, 3, border_mode='same'))
 model.add(Activation('relu'))
