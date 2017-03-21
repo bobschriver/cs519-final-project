@@ -11,23 +11,23 @@ from __future__ import print_function
 import pydot
 pydot.find_graphviz = lambda: True
 import numpy as np
-import keras.backend as K
+
 
 
 from keras.datasets import cifar10
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Conv2D,Convolution2D, MaxPooling2D
+from keras.layers import Convolution2D, MaxPooling2D
 from keras.utils import np_utils
-
-
+from keras import optimizers
+from keras.callbacks import CSVLogger
+from keras.models import load_model
 
 
 batch_size = 32
 nb_classes = 10
-nb_epoch = 10
-data_augmentation = True
+nb_epoch = 100
 
 # input image dimensions
 img_rows, img_cols = 32, 32
@@ -47,102 +47,51 @@ Y_test = np_utils.to_categorical(y_test, nb_classes)
 
 model = Sequential()
 
-w = [np.array(
-	[
-		[
-			[
-				[1],[1],[1]
-			],
-			[
-				[3],[3],[3]
-			],
-		[[3],
-		[3],
-		[3]],
-		[[1],
-		[1],
-		[1]]],
+w2 = np.array(
+		[[[[.0]], [[-.032]], [[.0]]],
+		[[[.284]], [[.496]], [[.284]]],
+		[[[.0]], [[-.032]], [[.0]]]], dtype='float32')
 
-		[[[3],
-		[3],
-		[3]],
-		[[9],
-		[9],
-		[9]],
-		[[9],
-		[9],
-		[9]],
-		[[3],
-		[3],
-		[3]]],
 
-		[[[3],
-		[3],
-		[3]],
-		[[9],
-		[9],
-		[9]],
-		[[9],
-		[9],
-		[9]],
-		[[3],
-		[3],
-		[3]]],
-
-		[[[1],
-		[1],
-		[1]],
-		[[3],
-		[3],
-		[3]],
-		[[3],
-		[3],
-		[3]],
-		[[1],
-		[1],
-		[1]]]],dtype='float32')]
-
-print(len(w))
-print(w[0].shape)
-
-w2 = np.array([
-		[[[1]], [[3]], [[3]], [[1]]],
-		[[[3]], [[9]], [[9]], [[3]]],
-		[[[3]], [[9]], [[9]], [[3]]],
-		[[[1]], [[3]], [[3]], [[1]]]
-	], dtype='float32')
-
-w_tile = [np.tile(w2, [1, 1, 3, 1])]
-
-print(len(w_tile))
-print(w_tile[0].shape)
-
-model.add(Convolution2D(3, 3, 3, border_mode='same',input_shape=(32,32,3)))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-
-conv = Conv2D(1, 4, strides=[2,2], weights=w_tile, border_mode='same', activation='relu',trainable=False,bias=False)
-model.add(conv)
+model.add(Convolution2D(32, 3, 3, border_mode='same',input_shape=X_train.shape[1:],activation='relu'))
 #model.add(MaxPooling2D(pool_size=(2, 2)))
 
-model.add(Convolution2D(64, 3, 3, border_mode='same'))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+w_tile = [np.tile(w2, [1, 1, 32, 1])]
+conv = Convolution2D(1, 3, strides=[2,2], weights =w_tile, border_mode='same',bias=False
+	,name='lanczosConv',trainable=False)
+model.add(conv)
 
-model.add(Convolution2D(128, 3, 3, border_mode='same'))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+
+#model.add(MaxPooling2D(pool_size=(2, 2)))
+
+#print("Shape of Weights: ", conv.get_weights())
+
+model.add(Convolution2D(64, 3, 3, border_mode='same',activation='relu'))
+#model.add(MaxPooling2D(pool_size=(2, 2)))
+
+
+w_tile2 = [np.tile(w2, [1, 1, 64, 1])]
+conv2 = Convolution2D(1, 3, strides=[2,2], weights =w_tile2, border_mode='same',bias=False
+	,name='lanczosConv2',trainable=False)
+model.add(conv2)
+
+model.add(Convolution2D(128, 3, 3, border_mode='same',activation='relu'))
+#model.add(MaxPooling2D(pool_size=(2, 2)))
+w_tile3 = [np.tile(w2, [1, 1, 128, 1])]
+conv3 = Convolution2D(1, 3, strides=[2,2], weights =w_tile3, border_mode='same',bias=False
+	,name='lanczosConv3',trainable=False)
+model.add(conv3)
 
 model.add(Flatten())
-model.add(Dense(512))
-model.add(Activation('relu'))
+model.add(Dense(512,activation='sigmoid'))
 model.add(Dense(nb_classes))
 model.add(Activation('softmax'))
 
 model.summary()
 #Let's train the model using RMSprop
+adm = optimizers.Adamax(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0001)
 model.compile(loss='categorical_crossentropy',
-              optimizer='rmsprop',
+              optimizer=adm,
               metrics=['accuracy'])
 
 X_train = X_train.astype('float32')
@@ -150,8 +99,10 @@ X_test = X_test.astype('float32')
 X_train /= 255
 X_test /= 255
 
+csv_logger = CSVLogger('Lanczos.csv')
 model.fit(X_train, Y_train,
           batch_size=batch_size,
-          epochs=nb_epoch,
+          nb_epoch=nb_epoch,
           validation_data=(X_test, Y_test),
-          shuffle=True)
+          shuffle=True, callbacks=[csv_logger])
+model.save('Lanczos.h5')
